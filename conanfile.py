@@ -16,15 +16,14 @@ class Generator(ConanFile):
 
   def generate(self):
     tc = CMakeToolchain(self)
-    if self.settings.os == "Windows":
-      tc.generator = "Visual Studio 17"
-    tc.blocks["cppstd"].values = {"cppstd": "20"}
     tc.generate()
 
   def export_sources(self):
     copy(self, "*.txt", self.recipe_folder, self.export_sources_folder)
-    copy(self, "src/*.cpp", self.recipe_folder, self.export_sources_folder)
+    copy(self, "src/*.inl", self.recipe_folder, self.export_sources_folder)
     copy(self, "src/*.h", self.recipe_folder, self.export_sources_folder)
+    copy(self, "src/*.hpp", self.recipe_folder, self.export_sources_folder)
+    copy(self, "src/*.cpp", self.recipe_folder, self.export_sources_folder)
 
   def source(self):
     # Check that we can see that the CMakeLists.txt is inside the source folder
