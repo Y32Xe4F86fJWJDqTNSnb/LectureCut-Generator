@@ -1,55 +1,29 @@
 #pragma once
 
-#include <deque>
-#include <condition_variable>
-#include <iostream>
+#include "pipeline/pipeline.h"
 
-#define VERSION "0.1.1"
+#include "fvad.hpp"
 
-#define PROGRESS_BAR_NAME "Generating"
+#include <stdexcept>
 
-class PCM_QUEUE {
-  std::deque<int16_t> queue;
-  std::mutex mutex;
-  std::condition_variable cv;
-  bool done = false;
-public:
-  void push(int16_t* data, int size) {
-    std::unique_lock<std::mutex> lock(mutex);
-    for (int i = 0; i < size; i++) {
-      queue.push_back(data[i]);
-    }
-    lock.unlock();
-    cv.notify_one();
-  }
+constexpr static char 
+  VERSION_NAME[] = {"0.2.0"},
+  PROGRESS_BAR_NAME[] = {"Identify Speech"};
 
-  int pop(int16_t* data, int size) {
-    std::unique_lock<std::mutex> lock(mutex);
-    cv.wait(lock, [&] { return done || queue.size() >= size; });
-    int i = 0;
-    while (i < size && !queue.empty()) {
-      data[i] = queue.front();
-      queue.pop_front();
-      i++;
-    }
-    lock.unlock();
-    cv.notify_one();
-    return i;
-  }
+constexpr static VAD::SampleRate
+  PCM_SAMPLE_RATE_CHOICE = VAD::SampleRate::sr8000hz;
 
-  size_t size() {
-    std::lock_guard<std::mutex> lock(mutex);
-    return queue.size();
-  }
+constexpr static int 
+  PCM_SAMPLE_RATE = 8000,
+  FRAME_LENGTH_CENTISECONDS = 2, // [1, 3] allowed by fvad
+  HALF_FRAME_LENGTH_CENTISECONDS = FRAME_LENGTH_CENTISECONDS / 2 + (FRAME_LENGTH_CENTISECONDS % 2 != 0), 
+  FRAME_LENGTH = PCM_SAMPLE_RATE / 100 * FRAME_LENGTH_CENTISECONDS;
 
-  void set_done() {
-    std::unique_lock<std::mutex> lock(mutex);
-    done = true;
-    lock.unlock();
-    cv.notify_one();
-  }
+using PCMType = int16_t;
+using PCMChunk = std::array<PCMType, FRAME_LENGTH>;
+using PCMQueue = PipelineQueue<PCMChunk, std::size_t>;
 
-  bool is_done() {
-    return done;
-  }
-};
+static void worker_thread_error_callback(char const * msg)
+{
+  throw std::runtime_error(msg);
+}

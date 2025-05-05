@@ -1,6 +1,7 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 4.0)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
+set(CXX_EXTENSIONS FALSE)
 
 project(generator)
 
@@ -58,7 +59,8 @@ add_subdirectory(3rdparty/libfvad)
 
 set(sources 
         src/generator.cpp
-        src/pcm.cpp
+        src/pipeline/fileToPCM.cpp
+        src/pipeline/pcmToCut.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED ${sources})
