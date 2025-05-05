@@ -13,8 +13,8 @@ namespace uuid {
   static std::uniform_int_distribution<> dis(0, 15);
   static std::uniform_int_distribution<> dis2(8, 11);
 
-  const char *generate_uuid_v4() {
-    std::stringstream ss;
+  char const * generate_uuid_v4() {
+    std::ostringstream ss;
     int i;
     ss << std::hex;
     for (i = 0; i < 8; i++) {
@@ -40,7 +40,7 @@ namespace uuid {
 
     std::string uuid = ss.str();
 
-    char *cstr = new char[uuid.length() + 1];
+    auto * cstr = new char[uuid.length() + 1];
     #ifdef _WIN32
     strcpy_s(cstr, uuid.length() + 1, uuid.c_str());
     #else

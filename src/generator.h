@@ -31,7 +31,7 @@ extern "C" {
 
   struct cut_list
   {
-    long num_cuts;
+    size_t num_cuts;
     cut* cuts;
   };
 
